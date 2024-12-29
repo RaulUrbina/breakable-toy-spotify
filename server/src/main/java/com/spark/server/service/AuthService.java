@@ -3,6 +3,7 @@ package com.spark.server.service;
 import com.spark.server.config.SpotifyProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.*;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import static com.spark.server.util.RandomStringGenerator.generateRandomString;
 
+@Service
 public class AuthService {
 
     private final SpotifyProperties spotifyProperties;
@@ -65,11 +67,11 @@ public class AuthService {
             if (responseBody != null && responseBody.containsKey("access_token")) {
                 return (String) responseBody.get("access_token");
             } else {
-                throw new RuntimeException("No se recibió el token de acceso.");
+                throw new RuntimeException("No access token found in the response.");
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Error al intercambiar el código por el token: " + e.getMessage(), e);
+            throw new RuntimeException("Error while exchanging the code: " + e.getMessage(), e);
         }
     }
 
