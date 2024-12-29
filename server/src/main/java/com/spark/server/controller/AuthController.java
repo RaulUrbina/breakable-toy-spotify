@@ -2,6 +2,7 @@ package com.spark.server.controller;
 
 import com.spark.server.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,25 +14,26 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/auth/spotify")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
-
+    //Login Endpoint
     @GetMapping
     public ResponseEntity<Void> login(HttpServletResponse response) throws IOException {
         authService.redirectToSpotifyLogin(response);
         return ResponseEntity.status(HttpStatus.FOUND).build();
     }
 
+    //Internal called callback endpoint
     @GetMapping("/callback")
-    public ResponseEntity<String> handleCallback(@RequestParam("code") String code) {
+    public ResponseEntity<String> handleCallback(@RequestParam("code") String code, HttpServletResponse response) {
         try {
-            String accessToken = authService.exchangeCodeForToken(code);
-            return ResponseEntity.ok("Access Token: " + accessToken);
+            String clientId = authService.exchangeCodeForToken(code);
+            response.sendRedirect("https://google.com/?accessToken=" + clientId);
+            return ResponseEntity.ok().build();
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error: " + e.getMessage());

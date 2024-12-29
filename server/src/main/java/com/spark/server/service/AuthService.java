@@ -1,7 +1,10 @@
 package com.spark.server.service;
 
 import com.spark.server.config.SpotifyProperties;
+import com.spark.server.token.TokenData;
+import com.spark.server.token.TokenStore;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -12,19 +15,18 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.spark.server.util.RandomStringGenerator.generateRandomString;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final SpotifyProperties spotifyProperties;
-    private final RestTemplate restTemplate;
-
-    public AuthService(SpotifyProperties spotifyProperties) {
-        this.spotifyProperties = spotifyProperties;
-        this.restTemplate = new RestTemplate();
-    }
+    private final TokenStore tokenStore;
+    private final TokenRefreshService tokenRefreshService;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public void redirectToSpotifyLogin(HttpServletResponse response) throws IOException {
         String state = generateRandomString();
@@ -64,8 +66,15 @@ public class AuthService {
             );
 
             Map responseBody = response.getBody();
+            System.out.println("Response Body: " + responseBody);
             if (responseBody != null && responseBody.containsKey("access_token")) {
-                return (String) responseBody.get("access_token");
+                String accessToken = (String) responseBody.get("access_token");
+                String refreshToken = (String) responseBody.get("refresh_token");
+                long expiresIn = ((Number) responseBody.get("expires_in")).longValue();
+
+                String clientId = UUID.randomUUID().toString();
+                tokenStore.storeTokens(clientId, accessToken, refreshToken, expiresIn);
+                return clientId;
             } else {
                 throw new RuntimeException("No access token found in the response.");
             }
@@ -75,5 +84,18 @@ public class AuthService {
         }
     }
 
+    public String getValidAccessToken(String clientId) {
+        TokenData tokenData = tokenStore.getTokens(clientId);
+
+        if (tokenData == null) {
+            throw new RuntimeException("No token found for the client " + clientId);
+        }
+
+        if (!tokenStore.isAccessTokenValid(clientId)) {
+            return tokenRefreshService.refreshAccessToken(clientId);
+        }
+
+        return tokenData.getAccessToken();
+    }
 
 }
