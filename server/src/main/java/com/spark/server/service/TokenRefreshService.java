@@ -3,6 +3,7 @@ package com.spark.server.service;
 import com.spark.server.config.SpotifyProperties;
 import com.spark.server.token.TokenData;
 import com.spark.server.token.TokenStore;
+import com.spark.server.util.SpotifyEndpoints;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class TokenRefreshService {
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
-                    "https://accounts.spotify.com/api/token",
+                    SpotifyEndpoints.TOKEN_URL,
                     HttpMethod.POST,
                     requestEntity,
                     Map.class

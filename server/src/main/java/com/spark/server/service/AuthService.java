@@ -3,6 +3,7 @@ package com.spark.server.service;
 import com.spark.server.config.SpotifyProperties;
 import com.spark.server.token.TokenData;
 import com.spark.server.token.TokenStore;
+import com.spark.server.util.SpotifyEndpoints;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -32,7 +33,7 @@ public class AuthService {
         String state = generateRandomString();
         String scope = "user-read-private user-read-email";
 
-        String spotifyAuthUrl = "https://accounts.spotify.com/authorize?" +
+        String spotifyAuthUrl = SpotifyEndpoints.AUTHORIZE_URL + "?" +
                 "response_type=code&" +
                 "client_id=" + spotifyProperties.getClientId() + "&" +
                 "scope=" + URLEncoder.encode(scope, StandardCharsets.UTF_8) + "&" +
@@ -43,7 +44,6 @@ public class AuthService {
     }
 
     public String exchangeCodeForToken(String code) {
-        String tokenUrl = "https://accounts.spotify.com/api/token";
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
@@ -59,7 +59,7 @@ public class AuthService {
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
-                    tokenUrl,
+                    SpotifyEndpoints.TOKEN_URL,
                     HttpMethod.POST,
                     requestEntity,
                     Map.class
