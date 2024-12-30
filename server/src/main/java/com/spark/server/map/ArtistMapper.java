@@ -1,7 +1,9 @@
 package com.spark.server.map;
 
 import com.spark.server.dto.ArtistDTO;
+import com.spark.server.dto.ArtistDetailDTO;
 import com.spark.server.model.SpotifyArtist;
+import com.spark.server.model.SpotifyArtistDetailResponse;
 import com.spark.server.model.SpotifyImage;
 import org.springframework.stereotype.Component;
 
@@ -36,5 +38,23 @@ public class ArtistMapper {
         );
     }
 
+    public ArtistDetailDTO mapToArtistDetailDTO(SpotifyArtistDetailResponse artistResponse) {
+        List<SpotifyImage> images = artistResponse.getImages();
+        String largeImage = !images.isEmpty() ? images.get(0).getUrl() : null;
+        String mediumImage = images.size() > 1 ? images.get(1).getUrl() : null;
+        String smallImage = images.size() > 2 ? images.get(2).getUrl() : null;
+
+        return ArtistDetailDTO.builder()
+                .id(artistResponse.getId())
+                .name(artistResponse.getName())
+                .smallImage(smallImage)
+                .mediumImage(mediumImage)
+                .largeImage(largeImage)
+                .genres(artistResponse.getGenres())
+                .spotifyUrl(artistResponse.getSpotifyUrl())
+                .followersNumber(artistResponse.getFollowersNumber())
+                .popularity(artistResponse.getPopularity())
+                .build();
+    }
 
 }

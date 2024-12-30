@@ -1,6 +1,8 @@
 package com.spark.server.service;
 
 import com.spark.server.config.SpotifyProperties;
+import com.spark.server.dto.ArtistDetailDTO;
+import com.spark.server.model.SpotifyArtistDetailResponse;
 import com.spark.server.model.SpotifyArtistResponse;
 import com.spark.server.model.SpotifyTokenResponse;
 import com.spark.server.util.SpotifyEndpoints;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -108,4 +112,43 @@ public class SpotifyApiService {
             throw new RuntimeException("Error while refreshing the token: " + e.getMessage(), e);
         }
     }
+
+    public SpotifyArtistDetailResponse getArtistDetails(String artistId, String accessToken) {
+        if (artistId == null || artistId.isEmpty()) {
+            throw new IllegalArgumentException("Artist ID is required.");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        try {
+            String url = SpotifyEndpoints.ARTIST_DETAILS + "/" + artistId;
+            ResponseEntity<SpotifyArtistDetailResponse> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    SpotifyArtistDetailResponse.class
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Spotify API error: " + response.getStatusCode());
+            }
+
+            SpotifyArtistDetailResponse responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new RuntimeException("Spotify API returned an empty response.");
+            }
+
+            return responseBody;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error while fetching artist details: " + e.getMessage(), e);
+        }
+    }
+
+
+
 }

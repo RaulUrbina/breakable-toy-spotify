@@ -9,7 +9,7 @@ public class SpotifyEndpoints {
     public static final String BASE_URL = "https://api.spotify.com/v1";
     public static final String ME = BASE_URL + "/me";
     public static final String TOP_ARTISTS = ME + "/top/artists";
-    public static final String ARTIST_DETAILS = BASE_URL + "/artists/{id}";
+    public static final String ARTIST_DETAILS = BASE_URL + "/artists";
     public static final String ALBUM_DETAILS = BASE_URL + "/albums/{id}";
     public static final String SEARCH = BASE_URL + "/search";
 
