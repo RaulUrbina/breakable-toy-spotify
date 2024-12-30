@@ -30,8 +30,8 @@ public class AuthController {
     @GetMapping("/callback")
     public ResponseEntity<String> handleCallback(@RequestParam("code") String code, HttpServletResponse response) {
         try {
-            String clientId = authService.exchangeCodeForToken(code);
-            response.sendRedirect("http://localhost:5173/dashboard?userId=" + clientId);
+            String sessionId = authService.exchangeCodeForToken(code);
+            response.sendRedirect("http://localhost:5173/dashboard?userId=" + sessionId);
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {

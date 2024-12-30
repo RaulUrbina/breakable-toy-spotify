@@ -16,9 +16,9 @@ public class SpotifyService {
     private final AuthService authService;
     private final ArtistMapper artistMapper;
 
-    public List<ArtistDTO> getUserTopArtists(String clientId) {
+    public List<ArtistDTO> getUserTopArtists(String sessionId) {
 
-        String accessToken = authService.getValidAccessToken(clientId);
+        String accessToken = authService.getValidAccessToken(sessionId);
 
         SpotifyArtistResponse response = spotifyApiService.getUserTopArtists(accessToken);
 

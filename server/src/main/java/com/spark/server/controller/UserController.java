@@ -19,9 +19,9 @@ public class UserController {
     private final SpotifyService spotifyService;
 
     @GetMapping("/top/artists")
-    public ResponseEntity<List<ArtistDTO>> getTopArtists(@RequestHeader("Client-Id") String clientId) {
+    public ResponseEntity<List<ArtistDTO>> getTopArtists(@RequestHeader("Session-Id") String sessionId) {
         try {
-            List<ArtistDTO> topArtists = spotifyService.getUserTopArtists(clientId);
+            List<ArtistDTO> topArtists = spotifyService.getUserTopArtists(sessionId);
             return ResponseEntity.ok(topArtists);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(null);
