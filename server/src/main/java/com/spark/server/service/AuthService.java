@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,12 +27,11 @@ public class AuthService {
 
     private final SpotifyProperties spotifyProperties;
     private final TokenStore tokenStore;
-    private final TokenRefreshService tokenRefreshService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     public void redirectToSpotifyLogin(HttpServletResponse response) throws IOException {
         String state = generateRandomString();
-        String scope = "user-read-private user-read-email";
+        String scope = "user-read-private user-read-email user-top-read";
 
         String spotifyAuthUrl = SpotifyEndpoints.AUTHORIZE_URL + "?" +
                 "response_type=code&" +
@@ -84,6 +84,51 @@ public class AuthService {
         }
     }
 
+    public String refreshAccessToken(String clientId) {
+        TokenData tokenData = tokenStore.getTokens(clientId);
+
+        if (tokenData == null || tokenData.getRefreshToken() == null) {
+            throw new RuntimeException("No token found for: " + clientId);
+        }
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "refresh_token");
+        body.add("refresh_token", tokenData.getRefreshToken());
+        body.add("client_id", spotifyProperties.getClientId());
+        body.add("client_secret", spotifyProperties.getClientSecret());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    SpotifyEndpoints.TOKEN_URL,
+                    HttpMethod.POST,
+                    requestEntity,
+                    Map.class
+            );
+
+            Map responseBody = response.getBody();
+            if (responseBody != null && responseBody.containsKey("access_token")) {
+                String newAccessToken = (String) responseBody.get("access_token");
+                long expiresIn = ((Number) responseBody.get("expires_in")).longValue();
+
+                tokenData.setAccessToken(newAccessToken);
+                tokenData.setExpiresAt(Instant.now().plusSeconds(expiresIn));
+                tokenStore.storeTokens(clientId, tokenData.getAccessToken(), tokenData.getRefreshToken(), expiresIn);
+
+                return newAccessToken;
+            } else {
+                throw new RuntimeException("No token found in the response.");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error while refreshing the token: " + e.getMessage(), e);
+        }
+    }
+
     public String getValidAccessToken(String clientId) {
         TokenData tokenData = tokenStore.getTokens(clientId);
 
@@ -92,7 +137,7 @@ public class AuthService {
         }
 
         if (!tokenStore.isAccessTokenValid(clientId)) {
-            return tokenRefreshService.refreshAccessToken(clientId);
+            return refreshAccessToken(clientId);
         }
 
         return tokenData.getAccessToken();

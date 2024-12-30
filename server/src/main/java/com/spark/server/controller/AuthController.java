@@ -31,7 +31,7 @@ public class AuthController {
     public ResponseEntity<String> handleCallback(@RequestParam("code") String code, HttpServletResponse response) {
         try {
             String clientId = authService.exchangeCodeForToken(code);
-            response.sendRedirect("https://google.com/?accessToken=" + clientId);
+            response.sendRedirect("http://localhost:5173/dashboard?userId=" + clientId);
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
