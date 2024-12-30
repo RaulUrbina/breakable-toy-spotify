@@ -5,10 +5,10 @@ import com.spark.server.model.SpotifyTokenResponse;
 import com.spark.server.token.TokenData;
 import com.spark.server.token.TokenStore;
 import com.spark.server.util.SpotifyEndpoints;
+import static com.spark.server.util.RandomStringGenerator.generateRandomString;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -16,14 +16,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
-import static com.spark.server.util.RandomStringGenerator.generateRandomString;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
-    private final RestTemplate restTemplate = new RestTemplate();
-
     private final SpotifyProperties spotifyProperties;
     private final SpotifyApiService spotifyApiService;
     private final TokenStore tokenStore;
@@ -54,11 +49,11 @@ public class AuthService {
 
             String sessionId = UUID.randomUUID().toString();
             tokenStore.storeTokens(sessionId, accessToken, refreshToken, expiresIn);
+
             return sessionId;
         } else {
             throw new RuntimeException("No access token found in the response.");
         }
-
     }
 
     //Refreshes the access token
@@ -66,7 +61,7 @@ public class AuthService {
         TokenData tokenData = tokenStore.getTokens(sessionId);
 
         if (tokenData == null || tokenData.getRefreshToken() == null) {
-            throw new RuntimeException("No token found for: " + sessionId);
+            throw new IllegalArgumentException("No token found for session: " + sessionId);
         }
 
         SpotifyTokenResponse tokenResponse = spotifyApiService.refreshAccessToken(tokenData.getRefreshToken());
@@ -81,7 +76,7 @@ public class AuthService {
 
             return newAccessToken;
         } else {
-            throw new RuntimeException("No access token found in the response.");
+            throw new RuntimeException("Failed to refresh access token for session: " + sessionId);
         }
     }
 

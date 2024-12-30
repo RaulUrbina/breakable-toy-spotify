@@ -47,6 +47,10 @@ public class SpotifyApiService {
 
 
     public SpotifyArtistResponse getUserTopArtists(String accessToken) {
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new IllegalArgumentException("Access token is missing or invalid.");
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(accessToken);
@@ -55,8 +59,16 @@ public class SpotifyApiService {
 
         try {
             ResponseEntity<SpotifyArtistResponse> response = restTemplate.exchange(
-                    SpotifyEndpoints.TOP_ARTISTS, HttpMethod.GET, request, SpotifyArtistResponse.class
+                    SpotifyEndpoints.TOP_ARTISTS,
+                    HttpMethod.GET,
+                    request,
+                    SpotifyArtistResponse.class
             );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Spotify API error: " + response.getStatusCode() + " - " + response.getBody());
+            }
+
             return response.getBody();
         } catch (Exception e) {
             throw new RuntimeException("Error: " + e.getMessage(), e);
@@ -64,6 +76,9 @@ public class SpotifyApiService {
     }
 
     public SpotifyTokenResponse refreshAccessToken(String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new IllegalArgumentException("Refresh token is missing or invalid.");
+        }
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "refresh_token");
@@ -83,6 +98,10 @@ public class SpotifyApiService {
                     requestEntity,
                     SpotifyTokenResponse.class
             );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Spotify API error: " + response.getStatusCode() + " - " + response.getBody());
+            }
 
             return response.getBody();
         } catch (Exception e) {

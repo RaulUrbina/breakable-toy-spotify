@@ -17,11 +17,8 @@ public class SpotifyService {
     private final ArtistMapper artistMapper;
 
     public List<ArtistDTO> getUserTopArtists(String sessionId) {
-
         String accessToken = authService.getValidAccessToken(sessionId);
-
         SpotifyArtistResponse response = spotifyApiService.getUserTopArtists(accessToken);
-
         return artistMapper.mapToArtistDTOs(response.getItems());
 
     }
