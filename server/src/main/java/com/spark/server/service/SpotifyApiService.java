@@ -1,7 +1,9 @@
 package com.spark.server.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spark.server.config.SpotifyProperties;
 import com.spark.server.dto.ArtistDetailDTO;
+import com.spark.server.model.SpotifyAlbumDetailResponse;
 import com.spark.server.model.SpotifyArtistDetailResponse;
 import com.spark.server.model.SpotifyArtistResponse;
 import com.spark.server.model.SpotifyTokenResponse;
@@ -11,6 +13,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
@@ -148,6 +152,43 @@ public class SpotifyApiService {
             throw new RuntimeException("Error while fetching artist details: " + e.getMessage(), e);
         }
     }
+
+    public SpotifyAlbumDetailResponse getAlbumDetails(String albumId, String accessToken) {
+        String url = SpotifyEndpoints.ALBUM_DETAILS.replace("{id}", albumId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(response.getBody(), SpotifyAlbumDetailResponse.class);
+        } catch (HttpClientErrorException e) {
+            // Log para el error y el cuerpo de la respuesta
+            System.err.println("HTTP Error: " + e.getStatusCode());
+            System.err.println("Response Body: " + e.getResponseBodyAsString());
+            throw new RuntimeException("Error fetching album details: " + e.getMessage(), e);
+        } catch (HttpServerErrorException e) {
+            // Log para errores de servidor
+            System.err.println("Server Error: " + e.getStatusCode());
+            System.err.println("Response Body: " + e.getResponseBodyAsString());
+            throw new RuntimeException("Error fetching album details: " + e.getMessage(), e);
+        } catch (Exception e) {
+            // Log para errores genéricos
+            System.err.println("General Error: " + e.getMessage());
+            throw new RuntimeException("Error fetching album details: " + e.getMessage(), e);
+        }
+    }
+
 
 
 

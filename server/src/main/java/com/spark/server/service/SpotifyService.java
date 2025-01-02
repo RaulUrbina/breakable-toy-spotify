@@ -3,6 +3,7 @@ package com.spark.server.service;
 import com.spark.server.dto.ArtistDTO;
 import com.spark.server.dto.ArtistDetailDTO;
 import com.spark.server.map.ArtistMapper;
+import com.spark.server.model.SpotifyAlbumDetailResponse;
 import com.spark.server.model.SpotifyArtistDetailResponse;
 import com.spark.server.model.SpotifyArtistResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,14 @@ public class SpotifyService {
         SpotifyArtistDetailResponse response = spotifyApiService.getArtistDetails(artistId, accessToken);
         return artistMapper.mapToArtistDetailDTO(response);
     }
+
+    public SpotifyAlbumDetailResponse getAlbumDetails(String sessionId, String albumId) {
+        String accessToken = authService.getValidAccessToken(sessionId);
+
+        return spotifyApiService.getAlbumDetails(albumId, accessToken);
+    }
+
+
 
 
 }
