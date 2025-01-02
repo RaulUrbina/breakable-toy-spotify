@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@features/*": ["./src/features/*"],
+      "@features/*": ["src/pages/*"],
       "@store/*": ["./src/store/*"],
     },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
