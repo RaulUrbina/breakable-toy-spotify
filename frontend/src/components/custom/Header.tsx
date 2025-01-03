@@ -5,6 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const user = {
@@ -24,7 +25,9 @@ const Header = () => {
     <header className="flex justify-between items-center p-4 bg-gray-900 text-white shadow-md">
       <div className="flex-1"></div>
 
-      <h1 className="text-2xl font-bold flex-1 text-center">Sparkify</h1>
+      <Link to="/" className="text-2xl font-bold hover:text-gray-300 transition">
+        Sparkify
+      </Link>
 
       <div className="flex-1 flex justify-end">
         <DropdownMenu>

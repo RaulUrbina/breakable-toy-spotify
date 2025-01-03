@@ -1,41 +1,45 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LoginPage from "@/pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import MainLayout from "@/components/custom/MainLayout";
 import useUserStore from "@store/UserStore";
-
+import ArtistPage from "@/pages/ArtistPage";
+import AlbumPage from "@/pages/AlbumPage";
 function App() {
-  const sessionId = useUserStore((state) => state.sessionId); 
-  const RootRedirect = () => {
-    return sessionId ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
-  };
+  const sessionId = useUserStore((state) => state.sessionId);
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<RootRedirect />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/"
+          element={
+            sessionId ? (
+              <MainLayout>
+                <HomePage />
+              </MainLayout>
+            ) : (
+              <LoginPage />
+            )
+          }
+        />
+        <Route
+          path="/artists/:id"
+          element={
+            <MainLayout>
+              <ArtistPage />
+            </MainLayout>
+          }
+        />
 
-        { (
-          <>
-            <Route
-              path="/dashboard"
-              element={
-                <MainLayout>
-                  <HomePage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <MainLayout>
-                  <HomePage />
-                </MainLayout>
-              }
-            />
-          </>
-        )}
+        <Route
+          path="/albums/:id"
+          element={
+            <MainLayout>
+              <AlbumPage />
+            </MainLayout>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

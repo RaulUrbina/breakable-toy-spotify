@@ -1,12 +1,15 @@
-import ApiService from "@/services/ApiService";
+import { redirectToSpotifyAuth } from "@/services/ApiService";
 import { FaSpotify } from "react-icons/fa";
 import useUserStore from "@store/UserStore";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 const LoginPage = () => {
   const sessionId = useUserStore((state) => state.sessionId);
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const setSessionId = useUserStore((state) => state.setSessionId);
 
   useEffect(() => {
     if (sessionId) {
@@ -14,8 +17,26 @@ const LoginPage = () => {
     }
   }, [sessionId, navigate]);
 
+  useEffect(() => {
+
+    if (sessionId) {
+      navigate(0);
+    }
+    const params = new URLSearchParams(location.search);
+    const userId = params.get("userId");
+    if (userId) {
+      setSessionId(userId);
+
+      params.delete("userId");
+
+      navigate(0);
+
+    }
+    
+  }, [location, navigate, setSessionId, sessionId]);
+
   const handleLogin = () => {
-    ApiService.redirectToSpotifyAuth();
+    redirectToSpotifyAuth();
   };
 
   return (
