@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ItemScroller from "@/components/custom/ItemScroller";
 import { search } from "@/services/ApiService";
 import { ArtistPreview } from "@/types/ArtistPreview";
 import { AlbumPreview } from "@/types/AlbumPreview";
 import { Track } from "@/types/Track";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CiSearch } from "react-icons/ci";
 
 const SearchComponent = () => {
   const [query, setQuery] = useState<string>("");
@@ -18,8 +19,7 @@ const SearchComponent = () => {
     if (!query.trim()) return;
 
     setIsLoading(true);
-    setHasSearched(true); // Indica que se ha realizado una búsqueda
-
+    setHasSearched(true);
     try {
       const results = await search(query);
       setArtists(results.artists);
@@ -45,9 +45,9 @@ const SearchComponent = () => {
         />
         <button
           onClick={handleSearch}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+          className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-blue-600 transition"
         >
-          Search
+          <CiSearch />
         </button>
       </div>
 

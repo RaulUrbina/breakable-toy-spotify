@@ -58,7 +58,6 @@ const ArtistPage = () => {
     <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Left Column */}
       <div className="flex flex-col items-center">
-        {/* Contenedor para imagen y Skeleton */}
         <div className="w-4/5 h-3/5 rounded mb-4 flex items-center justify-center bg-gray-200">
           {isLoading ? (
             <Skeleton className="w-full h-full rounded" />
@@ -70,7 +69,6 @@ const ArtistPage = () => {
             />
           )}
         </div>
-        {/* Contenedor para el nombre */}
         <div className="w-1/2 h-8">
           {isLoading ? (
             <Skeleton className="w-full h-full rounded" />

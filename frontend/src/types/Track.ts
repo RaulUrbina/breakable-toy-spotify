@@ -12,5 +12,7 @@ export interface Track {
     smallImage: string;
     mediumImage: string;
     largeImage: string;
+    duration: number;
+    duration_ms: number;
   }
   

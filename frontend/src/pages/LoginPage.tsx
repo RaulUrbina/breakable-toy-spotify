@@ -7,12 +7,10 @@ import { useEffect } from "react";
 const LoginPage = () => {
   const sessionId = useUserStore((state) => state.sessionId);
   const navigate = useNavigate();
-
   const location = useLocation();
   const setSessionId = useUserStore((state) => state.setSessionId);
 
   useEffect(() => {
-
     if (sessionId) {
       navigate(0);
     }
@@ -20,13 +18,9 @@ const LoginPage = () => {
     const userId = params.get("userId");
     if (userId) {
       setSessionId(userId);
-
       params.delete("userId");
-
       navigate(0);
-
     }
-    
   }, [location, navigate, setSessionId, sessionId]);
 
   const handleLogin = () => {
@@ -34,8 +28,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-[#3BAFDA] via-[#F4B400] to-[#EA4335] bg-[length:200%_200%] animate-gradient">
-      <h1 className="text-6xl font-bold text-white mb-12 drop-shadow-lg">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black">
+      <h1 className="text-9xl font-bold text-transparent mb-12 drop-shadow-lg animate-text-gradient bg-clip-text bg-gradient-to-r from-[#3BAFDA] via-[#F4B400] to-[#EA4335] bg-[length:200%_200%]">
         Sparkify
       </h1>
 

@@ -51,6 +51,32 @@ public class SpotifyApiService {
         }
     }
 
+    public SpotifyTokenResponse getClientTokens() {
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "client_credentials");
+        body.add("client_id", spotifyProperties.getClientId());
+        body.add("client_secret", spotifyProperties.getClientSecret());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<SpotifyTokenResponse> response = restTemplate.exchange(
+                    SpotifyEndpoints.TOKEN_URL,
+                    HttpMethod.POST,
+                    requestEntity,
+                    SpotifyTokenResponse.class
+            );
+
+            return response.getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Error while exchanging the code: " + e.getMessage(), e);
+        }
+    }
+
 
     public SpotifyArtistResponse getUserTopArtists(String accessToken) {
         if (accessToken == null || accessToken.isEmpty()) {

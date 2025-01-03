@@ -95,4 +95,20 @@ public class AuthService {
         return tokenData.getAccessToken();
     }
 
+    public void getClientTokens(){
+        SpotifyTokenResponse tokenResponse = spotifyApiService.getClientTokens();
+
+        if (tokenResponse != null && tokenResponse.getAccessToken() != null) {
+            String accessToken = tokenResponse.getAccessToken();
+            String refreshToken = tokenResponse.getRefreshToken();
+            long expiresIn = tokenResponse.getExpiresIn();
+
+            String sessionId = UUID.randomUUID().toString();
+            tokenStore.storeTokens(sessionId, accessToken, refreshToken, expiresIn);
+
+        } else {
+            throw new RuntimeException("No access token found in the response.");
+        }
+    }
+
 }

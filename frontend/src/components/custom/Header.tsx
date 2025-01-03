@@ -10,15 +10,6 @@ import { Link } from "react-router-dom";
 
 const Header = () => {
   const clearSessionId = useUserStore((state) => state.clearSessionId);
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-  };
-
-  const handleRedirect = () => {
-    console.log("Redirect clicked!");
-  };
-
   const handleLogout = () => {
     clearSessionId();
   };
@@ -27,7 +18,10 @@ const Header = () => {
     <header className="flex justify-between items-center p-4 bg-gray-900 text-white shadow-md">
       <div className="flex-1"></div>
 
-      <Link to="/" className="text-2xl font-bold hover:text-gray-300 transition">
+      <Link
+        to="/"
+        className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#3BAFDA] via-[#F4B400] to-[#EA4335] bg-[length:200%_200%] animate-text-gradient hover:opacity-80 transition"
+      >
         Sparkify
       </Link>
 
@@ -39,15 +33,6 @@ const Header = () => {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white text-gray-900">
-            <DropdownMenuItem>
-              <span className="font-semibold">{user.name}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <span className="text-sm">{user.email}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleRedirect}>
-              Redirect
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

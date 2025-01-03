@@ -39,7 +39,7 @@ const ItemScroller = <T extends Item>({
 
   return (
     <ScrollArea className="w-full rounded-md border">
-      <div className="flex w-max space-x-4 p-4">
+      <div className="flex w-max space-x-4 p-4 bg-slate-200">
         {isLoading
           ? Array.from({ length: maxItems }).map((_, index) => (
               <div key={index} className="shrink-0">

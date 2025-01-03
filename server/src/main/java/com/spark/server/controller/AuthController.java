@@ -31,11 +31,11 @@ public class AuthController {
     public ResponseEntity<String> handleCallback(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
         try {
             String sessionId = authService.exchangeCodeForToken(code);
-            response.sendRedirect("http://localhost:5173/?userId=" + sessionId);
+            response.sendRedirect("http://localhost:3000/?userId=" + sessionId);
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
-            response.sendRedirect("http://localhost:5173/?error=true");
+            response.sendRedirect("http://localhost:3000/?error=true");
             return ResponseEntity.internalServerError().build();
         }
     }
