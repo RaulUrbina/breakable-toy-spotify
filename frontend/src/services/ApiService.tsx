@@ -154,15 +154,6 @@ export const search = async (query: string): Promise<SearchResult> => {
   }
 };
 
-const transformTracks = (tracks: Track[]): Track[] => {
-  return tracks.map((track) => ({
-    ...track,
-    smallImage: track.album.smallImage,
-    mediumImage: track.album.mediumImage,
-    largeImage: track.album.largeImage,
-  }));
-};
-
 
 export const redirectToSpotifyAuth = async (): Promise<void> => {
   window.location.href = `${API_BASE_URL}/auth/spotify`;

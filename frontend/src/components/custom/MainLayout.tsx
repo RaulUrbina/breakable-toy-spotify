@@ -20,9 +20,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       setSessionId(userId);
 
       params.delete("userId");
-      navigate("/dashboard", { replace: true });
+      navigate("/", { replace: true });
     } else if (!sessionId) {
-      navigate("/login", { replace: true });
+      navigate("/");
     }
     
   }, [location, navigate, setSessionId, sessionId]);

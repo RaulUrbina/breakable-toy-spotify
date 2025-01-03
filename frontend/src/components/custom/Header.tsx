@@ -4,10 +4,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useUserStore from "@/store/UserStore";
 import { UserIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Header = () => {
+  const clearSessionId = useUserStore((state) => state.clearSessionId);
   const user = {
     name: "John Doe",
     email: "john.doe@example.com",
@@ -18,7 +20,7 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    console.log("Logout clicked!");
+    clearSessionId();
   };
 
   return (

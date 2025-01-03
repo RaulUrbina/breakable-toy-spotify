@@ -4,6 +4,7 @@ import { search } from "@/services/ApiService";
 import { ArtistPreview } from "@/types/ArtistPreview";
 import { AlbumPreview } from "@/types/AlbumPreview";
 import { Track } from "@/types/Track";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SearchComponent = () => {
   const [query, setQuery] = useState<string>("");
@@ -56,31 +57,43 @@ const SearchComponent = () => {
           {/* Artists */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Artists</h2>
-            <ItemScroller<ArtistPreview>
-              fetchItems={() => Promise.resolve(artists)}
-              type="artist"
-              maxItems={10}
-            />
+            {isLoading ? (
+              <Skeleton className="h-48 w-full rounded-md" />
+            ) : (
+              <ItemScroller<ArtistPreview>
+                fetchItems={() => Promise.resolve(artists)}
+                type="artist"
+                maxItems={10}
+              />
+            )}
           </div>
 
           {/* Albums */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Albums</h2>
-            <ItemScroller<AlbumPreview>
-              fetchItems={() => Promise.resolve(albums)}
-              type="album"
-              maxItems={10}
-            />
+            {isLoading ? (
+              <Skeleton className="h-48 w-full rounded-md" />
+            ) : (
+              <ItemScroller<AlbumPreview>
+                fetchItems={() => Promise.resolve(albums)}
+                type="album"
+                maxItems={10}
+              />
+            )}
           </div>
 
           {/* Tracks */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Tracks</h2>
-            <ItemScroller<Track>
-              fetchItems={() => Promise.resolve(tracks)}
-              type="track"
-              maxItems={10}
-            />
+            {isLoading ? (
+              <Skeleton className="h-48 w-full rounded-md" />
+            ) : (
+              <ItemScroller<Track>
+                fetchItems={() => Promise.resolve(tracks)}
+                type="track"
+                maxItems={10}
+              />
+            )}
           </div>
         </div>
       )}

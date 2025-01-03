@@ -12,12 +12,6 @@ const LoginPage = () => {
   const setSessionId = useUserStore((state) => state.setSessionId);
 
   useEffect(() => {
-    if (sessionId) {
-      navigate("/dashboard");
-    }
-  }, [sessionId, navigate]);
-
-  useEffect(() => {
 
     if (sessionId) {
       navigate(0);
