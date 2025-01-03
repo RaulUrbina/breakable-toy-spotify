@@ -24,13 +24,6 @@ public class SpotifyAlbumDetailResponse {
     @JsonProperty("total_tracks")
     private int totalTracks;
 
-    @JsonProperty("popularity")
-    private int popularity;
-
-    private String label;
-
-    private List<String> genres;
-
     private String spotifyUrl;
 
     @JsonProperty("images")
