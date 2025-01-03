@@ -1,4 +1,16 @@
 {
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "commonjs",
+    "target": "esnext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@features/*": ["src/pages/*"],
+    },
+    "types": ["jest", "@testing-library/jest-dom"],
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },

@@ -11,21 +11,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TokenStore {
     private final ConcurrentHashMap<String, TokenData> tokenStore = new ConcurrentHashMap<>();
 
-    public void storeTokens(String clientId, String accessToken, String refreshToken, long expiresIn) {
+    public void storeTokens(String sessionId, String accessToken, String refreshToken, long expiresIn) {
         TokenData tokenData = new TokenData(
                 accessToken,
                 refreshToken,
                 Instant.now().plusSeconds(expiresIn)
         );
-        tokenStore.put(clientId, tokenData);
+        tokenStore.put(sessionId, tokenData);
     }
 
-    public TokenData getTokens(String clientId) {
-        return tokenStore.get(clientId);
+    public TokenData getTokens(String sessionId) {
+        return tokenStore.get(sessionId);
     }
 
-    public boolean isAccessTokenValid(String clientId) {
-        TokenData tokenData = tokenStore.get(clientId);
+    public boolean isAccessTokenValid(String sessionId) {
+        TokenData tokenData = tokenStore.get(sessionId);
         return tokenData != null && Instant.now().isBefore(tokenData.getExpiresAt());
     }
 

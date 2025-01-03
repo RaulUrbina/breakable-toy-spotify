@@ -28,15 +28,15 @@ public class AuthController {
 
     //Internal called callback endpoint
     @GetMapping("/callback")
-    public ResponseEntity<String> handleCallback(@RequestParam("code") String code, HttpServletResponse response) {
+    public ResponseEntity<String> handleCallback(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
         try {
-            String clientId = authService.exchangeCodeForToken(code);
-            response.sendRedirect("https://google.com/?accessToken=" + clientId);
+            String sessionId = authService.exchangeCodeForToken(code);
+            response.sendRedirect("http://localhost:3000/?userId=" + sessionId);
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error: " + e.getMessage());
+            response.sendRedirect("http://localhost:3000/?error=true");
+            return ResponseEntity.internalServerError().build();
         }
     }
 

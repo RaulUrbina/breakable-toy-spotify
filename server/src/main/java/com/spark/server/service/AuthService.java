@@ -1,37 +1,32 @@
 package com.spark.server.service;
 
 import com.spark.server.config.SpotifyProperties;
+import com.spark.server.model.SpotifyTokenResponse;
 import com.spark.server.token.TokenData;
 import com.spark.server.token.TokenStore;
 import com.spark.server.util.SpotifyEndpoints;
+import static com.spark.server.util.RandomStringGenerator.generateRandomString;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.time.Instant;
 import java.util.UUID;
-
-import static com.spark.server.util.RandomStringGenerator.generateRandomString;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
     private final SpotifyProperties spotifyProperties;
+    private final SpotifyApiService spotifyApiService;
     private final TokenStore tokenStore;
-    private final TokenRefreshService tokenRefreshService;
-    private final RestTemplate restTemplate = new RestTemplate();
 
+    //Generates Spotify's URL for Auth process
     public void redirectToSpotifyLogin(HttpServletResponse response) throws IOException {
         String state = generateRandomString();
-        String scope = "user-read-private user-read-email";
+        String scope = "user-read-private user-read-email user-top-read";
 
         String spotifyAuthUrl = SpotifyEndpoints.AUTHORIZE_URL + "?" +
                 "response_type=code&" +
@@ -43,59 +38,77 @@ public class AuthService {
         response.sendRedirect(spotifyAuthUrl);
     }
 
+    //Trades the login code returned from the Auth process for an access and refresh token
     public String exchangeCodeForToken(String code) {
+        SpotifyTokenResponse tokenResponse = spotifyApiService.exchangeCodeForToken(code);
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "authorization_code");
-        body.add("code", code);
-        body.add("redirect_uri", spotifyProperties.getRedirectUri());
-        body.add("client_id", spotifyProperties.getClientId());
-        body.add("client_secret", spotifyProperties.getClientSecret());
+        if (tokenResponse != null && tokenResponse.getAccessToken() != null) {
+            String accessToken = tokenResponse.getAccessToken();
+            String refreshToken = tokenResponse.getRefreshToken();
+            long expiresIn = tokenResponse.getExpiresIn();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            String sessionId = UUID.randomUUID().toString();
+            tokenStore.storeTokens(sessionId, accessToken, refreshToken, expiresIn);
 
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
-
-        try {
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    SpotifyEndpoints.TOKEN_URL,
-                    HttpMethod.POST,
-                    requestEntity,
-                    Map.class
-            );
-
-            Map responseBody = response.getBody();
-            System.out.println("Response Body: " + responseBody);
-            if (responseBody != null && responseBody.containsKey("access_token")) {
-                String accessToken = (String) responseBody.get("access_token");
-                String refreshToken = (String) responseBody.get("refresh_token");
-                long expiresIn = ((Number) responseBody.get("expires_in")).longValue();
-
-                String clientId = UUID.randomUUID().toString();
-                tokenStore.storeTokens(clientId, accessToken, refreshToken, expiresIn);
-                return clientId;
-            } else {
-                throw new RuntimeException("No access token found in the response.");
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error while exchanging the code: " + e.getMessage(), e);
+            return sessionId;
+        } else {
+            throw new RuntimeException("No access token found in the response.");
         }
     }
 
-    public String getValidAccessToken(String clientId) {
-        TokenData tokenData = tokenStore.getTokens(clientId);
+    //Refreshes the access token
+    public String refreshAccessToken(String sessionId) {
+        TokenData tokenData = tokenStore.getTokens(sessionId);
 
-        if (tokenData == null) {
-            throw new RuntimeException("No token found for the client " + clientId);
+        if (tokenData == null || tokenData.getRefreshToken() == null) {
+            throw new IllegalArgumentException("No token found for session: " + sessionId);
         }
 
-        if (!tokenStore.isAccessTokenValid(clientId)) {
-            return tokenRefreshService.refreshAccessToken(clientId);
+        SpotifyTokenResponse tokenResponse = spotifyApiService.refreshAccessToken(tokenData.getRefreshToken());
+
+        if (tokenResponse != null && tokenResponse.getAccessToken() != null) {
+            String newAccessToken = tokenResponse.getAccessToken();
+            long expiresIn = tokenResponse.getExpiresIn();
+
+            tokenData.setAccessToken(newAccessToken);
+            tokenData.setExpiresAt(Instant.now().plusSeconds(expiresIn));
+            tokenStore.storeTokens(sessionId, newAccessToken, tokenData.getRefreshToken(), expiresIn);
+
+            return newAccessToken;
+        } else {
+            throw new RuntimeException("Failed to refresh access token for session: " + sessionId);
+        }
+    }
+
+    //Retrieves the access token based on the sessionId, refreshes it if needed
+    public String getValidAccessToken(String sessionId) {
+        TokenData tokenData = tokenStore.getTokens(sessionId);
+
+        if (tokenData == null) {
+            throw new RuntimeException("No token found for the session " + sessionId);
+        }
+
+        if (!tokenStore.isAccessTokenValid(sessionId)) {
+            return refreshAccessToken(sessionId);
         }
 
         return tokenData.getAccessToken();
+    }
+
+    public void getClientTokens(){
+        SpotifyTokenResponse tokenResponse = spotifyApiService.getClientTokens();
+
+        if (tokenResponse != null && tokenResponse.getAccessToken() != null) {
+            String accessToken = tokenResponse.getAccessToken();
+            String refreshToken = tokenResponse.getRefreshToken();
+            long expiresIn = tokenResponse.getExpiresIn();
+
+            String sessionId = UUID.randomUUID().toString();
+            tokenStore.storeTokens(sessionId, accessToken, refreshToken, expiresIn);
+
+        } else {
+            throw new RuntimeException("No access token found in the response.");
+        }
     }
 
 }
